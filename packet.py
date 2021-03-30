@@ -27,14 +27,14 @@ class PacketManager(type):
                 pass
             else:
                 mcs.registered_packets[alias] = cls
-                print(f"Packet '{name}' registered as {alias}!")
+                logger.info(f"Packet '{name}' registered as {alias}!")
         return cls
 
     def __del__(self):
         alias = str(self).encode()
         if self.__base__ is not object and alias in PacketManager.registered_packets:
             del PacketManager.registered_packets[alias]
-            print(f"Packet {self.__name__} un-registered!")
+            logger.info(f"Packet {self.__name__} un-registered!")
 
     def __str__(self):
         if self._alias:
@@ -106,19 +106,15 @@ class Connection:
         data = req_id_data + respond_to_data + packet_name_len + packet_name + packet_data
         data_len = struct.pack("!I", len(data))     # 4 bytes unsigned
 
-        with self.lock:
-            # print(f"SENDING {data_len + data} len({len(data)})")
-            try:
+        # print(f"SENDING {data_len + data} len({len(data)})")
+        try:
+            with self.lock:
                 self.sock.sendall(data_len + data)
-                if on_resp:
-                    self.response_callbacks[req_id] = on_resp
-            except (ConnectionError, OSError) as e:
-                with self.lock:
-                    if self.closed:
-                        return
-                self.close()
-                threading.Thread(target=lambda: self.on_close(self)).start()
-                raise PacketConnectionClosedException(e)
+            if on_resp:
+                self.response_callbacks[req_id] = on_resp
+        except (ConnectionError, OSError) as e:
+            self.close()
+            raise PacketConnectionClosedException(e)
 
     def _recv_all(self, n: int) -> bytes:
         try:
