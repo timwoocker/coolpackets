@@ -165,9 +165,8 @@ class Connection:
                 packet._conn = self
                 packet.on_recv()
                 if response_to is not None:
-                    with self.lock:
-                        if response_to in self.response_callbacks:
-                            self.response_callbacks[response_to](packet)
+                    if response_to in self.response_callbacks:
+                        self.response_callbacks[response_to](packet)
         except PacketConnectionClosedException as e:
             with self.lock:
                 if self.closed:
