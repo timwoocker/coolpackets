@@ -113,7 +113,7 @@ class Connection:
             if on_resp:
                 self.response_callbacks[req_id] = on_resp
         except (ConnectionError, OSError) as e:
-            self.close()
+            self.close(True)
             raise PacketConnectionClosedException(e)
 
     def _recv_all(self, n: int) -> bytes:
@@ -171,13 +171,14 @@ class Connection:
             with self.lock:
                 if self.closed:
                     return
-            self.close()
-            self.on_close(self)
+            self.close(True)
 
-    def close(self):
+    def close(self, emit_event=False):
         with self.lock:
             self.closed = True
             self.sock.close()
+            if emit_event:
+                self.on_close(self)
 
 
 class Packet(metaclass=PacketManager):
