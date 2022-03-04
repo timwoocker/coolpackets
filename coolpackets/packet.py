@@ -121,6 +121,8 @@ class Connection:
             received = b''
             while len(received) < n:
                 data = self.sock.recv(n - len(received))
+                if data == b'':
+                    raise ConnectionError("Empty data received.")
                 received += data
             return received
         except (ConnectionError, OSError) as e:
