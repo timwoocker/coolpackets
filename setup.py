@@ -11,7 +11,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setuptools.setup(
     name="coolpackets",
-    version="0.0.1",
+    version="0.0.2",
     author="Tim Woocker",
     author_email="tim.woocker@googlemail.com",
     description="Packet system for python TCP sockets.",
