@@ -1,3 +1,3 @@
 import logging
 
-logger = logging.Logger("Packets")
+logger = logging.Logger("coolpackets", logging.DEBUG)

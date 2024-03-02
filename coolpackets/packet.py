@@ -6,7 +6,7 @@ from inspect import isroutine
 from typing import Callable, Any
 
 import msgpack
-from typeguard import check_type
+from typeguard import check_type, TypeCheckError
 
 from . import utils
 from .logger import logger
@@ -200,19 +200,19 @@ class Packet(metaclass=PacketManager):
             for attr in public_attrs:
                 if attr not in kwargs:
                     try:
-                        check_type("x", None, public_attrs[attr])
+                        check_type(None, public_attrs[attr])
                         # if Optional not present, set it to None
                         setattr(self, attr, None)
-                    except TypeError:
-                        raise TypeError(f"Packet '{self.__class__.__name__}' missing "
+                    except TypeCheckError:
+                        raise TypeCheckError(f"Packet '{self.__class__.__name__}' missing "
                                         f"required argument '{attr}' of type: {public_attrs[attr]}")
             # assign attributes
             for key, value in kwargs.items():
                 if key not in public_attrs:
-                    raise TypeError(f"Packet '{self.__class__.__name__}' got an unexpected argument: {key}")
-                check_type(key, value, public_attrs[key])
+                    raise TypeCheckError(f"Packet '{self.__class__.__name__}' got an unexpected argument: {key}")
+                check_type(value, public_attrs[key])
                 self.__setattr__(key, value)
-        except TypeError as e:
+        except TypeCheckError as e:
             raise PacketInitializationFailedException(e)
 
     def __str__(self):
